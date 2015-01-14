@@ -102,7 +102,7 @@ STATICFILES_DIRS = (
 
 # register parse
 from parse_rest.connection import register
-PARSE_CONFIG = {'app_id': environ.get('PARSE_APPLICATION_ID'), 'api_key': environ.get('PARSE_REST_API_KEY')}
+PARSE_CONFIG = {'app_id': environ.get('PARSE_APPLICATION_ID'), 'api_key': environ.get('PARSE_REST_API_KEY'), 'master_key': environ.get('PARSE_REST_API_KEY')}
 register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
 
 
@@ -125,3 +125,9 @@ RQ_QUEUES = {
         'DEFAULT_TIMEOUT': 500,
     }
 }
+
+try:
+    import django_rq
+    REDIS_CONN = django_rq.get_connection()
+except:
+    pass
