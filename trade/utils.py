@@ -49,7 +49,7 @@ def create_parse_user(email, username, password):
 	email = email.lower()
 	ref = gen_alphanum_key()
 	
-	user = ParseUser.signup(username, password, email=email, ref=ref)
+	user = ParseUser.signup(username=username, password=password, email=email, ref=ref)
 	return user	
 
 def update_cash_ledger(user_id, amount):

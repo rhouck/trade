@@ -104,6 +104,7 @@ STATICFILES_DIRS = (
 from parse_rest.connection import register
 PARSE_CONFIG = {'app_id': environ.get('PARSE_APPLICATION_ID'), 'api_key': environ.get('PARSE_REST_API_KEY'), 'master_key': environ.get('PARSE_REST_API_KEY')}
 register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
+PARSE_CONFIG_DEV = {'app_id': environ.get('PARSE_APPLICATION_ID_DEV'), 'api_key': environ.get('PARSE_REST_API_KEY_DEV'), 'master_key': environ.get('PARSE_REST_API_KEY_DEV')}
 
 
 # setup redis queue
