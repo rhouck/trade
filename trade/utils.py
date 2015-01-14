@@ -16,3 +16,19 @@ from inlinestyler.utils import inline_css
 
 import django_rq
 redis_conn = django_rq.get_connection()
+
+
+def offer(user, dir, quant, px=None):
+	"""
+	user - parse user id
+	dir - str 'buy' or 'sell'
+	quant - int num shares
+	px - None if market, float if limit
+	"""
+	pass
+
+
+
+if __name__ == "__main__":
+	
+	print "hi"
