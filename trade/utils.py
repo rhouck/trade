@@ -164,8 +164,22 @@ def create_ipo_object(ticker, price, auth):
 	ipo_object.save()
 	return ipo_object
 
+
 def buy_ipo_shares(user_id, ticker, quantity):
-	pass
+	
+	if not isinstance(user_id, unicode):
+		raise ValueError('user_id must be unicode.')
+	if not isinstance(ticker, str):
+		raise ValueError('ticker must be string.')
+	if not isinstance(quantity, int):
+		raise ValueError('quantity must be int.')
+
+	try:
+		ipo_object = IPO.Query.get(ticker=ticker)
+	except Exception as err:
+		raise Exception('No IPO object available for that ticker - %s' % (err))
+	
+	pass 
 
 
 if __name__ == "__main__":
