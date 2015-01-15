@@ -65,22 +65,31 @@ class UserSignupTests(TestCase):
 		self.username = "test"
 		self.password = "test_password"
 		self.user_count = sum([1 for i in ParseUser.Query.all()])
-		self.ledger_count = sum([1 for i in CashLedger.Query.all()])
+		self.port_count = sum([1 for i in Portfolio.Query.all()])
+		self.ledger_count = sum([1 for i in Ledger.Query.all()])
 
 	def tearDown(self):
 		"""
 		delete test user from db
 		"""
 		user = ParseUser.login(self.username, self.password)
-		cash_ledger_item = CashLedger.Query.get(user_id=user.objectId)
-		cash_ledger_item.delete()
+		
+		port_item = Portfolio.Query.get(user_id=user.objectId)
+		port_item.delete()
+
+		ledger_item = Ledger.Query.get(user_id=user.objectId)
+		ledger_item.delete()
+		
 		user.delete()
 
-		# confirm number of user and cash ledger objects has not changed as a result of testing
+		# confirm number of user and ledger objects has not changed as a result of testing
 		post_user_count = sum([1 for i in ParseUser.Query.all()])
 		self.assertEqual(self.user_count, post_user_count)
 		
-		post_ledger_count = sum([1 for i in CashLedger.Query.all()])
+		post_port_count = sum([1 for i in Portfolio.Query.all()])
+		self.assertEqual(self.port_count, post_port_count)
+
+		post_ledger_count = sum([1 for i in Ledger.Query.all()])
 		self.assertEqual(self.ledger_count, post_ledger_count)
 
 	
@@ -249,10 +258,7 @@ class IPOTests(TestCase):
 		post_ipo_count = sum([1 for i in IPO.Query.all()])
 		self.assertEqual(self.ipo_count, post_ipo_count)
 
-	# test ipo where company doesn't exist
-	# test input values to create IPO object - try inappropriate vals
-	# try creating duplicate IPOs
-
+	
 	def test_create_ipo_object_where_co_not_exist(self):
 		raised = False
 		try:
@@ -310,3 +316,4 @@ class IPOTests(TestCase):
 		except:
 			raised = True
 		self.assertTrue(raised, 'Could create duplicate name company')
+

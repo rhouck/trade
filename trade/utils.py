@@ -8,9 +8,11 @@ from settings import LIVE
 
 class Company(Object):
     pass
-class CashLedger(Object):
+class Ledger(Object):
     pass
 class IPO(Object):
+    pass
+class Portfolio(Object):
     pass
 
 def gen_alphanum_key():
@@ -29,7 +31,7 @@ def offer(user_id, dir, quant, price=None):
 	"""
 	pass
 
-def update_cash_ledger(user_id, amount):
+def update_ledger(user_id, amount):
 	"""
 	records changes to cash balance due to trades, signups, referrals, etc
 	user_id - parse user id
@@ -41,9 +43,22 @@ def update_cash_ledger(user_id, amount):
 	if not isinstance(amount, float):
 		raise ValueError('amount must be float.')
 	
-	cash_ledger_item = CashLedger(user_id=user_id, amount=amount)
-	cash_ledger_item.save()
-	return cash_ledger_item
+	ledger_item = Ledger(user_id=user_id, amount=amount)
+	ledger_item.save()
+	return ledger_item
+
+def create_portfolio(user_id):
+	"""
+	creates a portoflio object to periodically summarize cash balance and shares held
+	user_id - parse user id
+	"""
+
+	if not isinstance(user_id, unicode):
+		raise ValueError('user_id must be unicode.')
+	
+	port_item = Portfolio(user_id=user_id, cash_balance=0.0)
+	port_item.save()
+	return port_item
 
 
 def create_parse_user(email, username, password):
@@ -74,9 +89,10 @@ def user_signup(email, username, password):
 		raise Exception(err)
 
 	try:
-		update_cash_ledger(user.objectId, 100.0)
+		create_portfolio(user.objectId)
+		update_ledger(user.objectId, 100.0)
 	except Exception as err:
-		# delete created user if error in update_cash_ledger
+		# delete created user if error in update_ledger
 		user.delete()
 		raise Exception(err)
 
@@ -148,10 +164,13 @@ def create_ipo_object(ticker, price, auth):
 	ipo_object.save()
 	return ipo_object
 
+def buy_ipo_shares(user_id, ticker, quantity):
+	pass
+
 
 if __name__ == "__main__":
 	
 	from settings import PARSE_CONFIG
 	from parse_rest.connection import register
 	register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
-	
+	user_signup('hey@hey.com', 'username', 'password')
