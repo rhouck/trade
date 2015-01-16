@@ -9,10 +9,13 @@ class ExchangeUserTests(TestCase):
 		
 		self.assertTrue(ExchangeUser, 'Did not find exchange user object')
 
+	def test_find_object_portfolio(self):
+
 		raised = False
 		try:
-			user = Portfolio.Query.get(user_id=ExchangeUser.objectId)
+			portfolio = Portfolio.Query.get(user_id=ExchangeUser.objectId)
 		except:
 			raised = True
+			
 		self.assertFalse(raised, 'Did not find portfolio object for exhange user')
 
