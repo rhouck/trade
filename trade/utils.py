@@ -4,7 +4,7 @@ import datetime
 from random import choice
 import string
 from django.utils.timezone import utc
-from settings import LIVE
+from settings import LIVE, EXCHANGE_USER_CONFIG
 
 class Company(Object):
     pass
@@ -20,6 +20,14 @@ def gen_alphanum_key():
     for i in range(8):
         key += choice(string.uppercase + string.lowercase + string.digits)
     return key
+
+# exchange parse user object
+def get_exchange_user():
+	try:
+		return ParseUser.Query.get(username=EXCHANGE_USER_CONFIG['username'])
+	except:
+		return None
+ExchangeUser = get_exchange_user()
 
 def offer(user_id, dir, quant, price=None):
 	"""
