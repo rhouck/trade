@@ -352,7 +352,7 @@ class BuyIPOSharesTests(TestCase):
 		company.delete()
 
 
-	# test no ipo object
+	
 	# test expired ipo
 	# test insufficient cash
 	# test insufficient shares available

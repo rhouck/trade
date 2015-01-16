@@ -187,4 +187,4 @@ if __name__ == "__main__":
 	from settings import PARSE_CONFIG
 	from parse_rest.connection import register
 	register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
-	user_signup('hey@hey.com', 'username', 'password')
+	

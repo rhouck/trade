@@ -107,6 +107,9 @@ register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
 PARSE_CONFIG_DEV = {'app_id': environ.get('PARSE_APPLICATION_ID_DEV'), 'api_key': environ.get('PARSE_REST_API_KEY_DEV'), 'master_key': environ.get('PARSE_REST_API_KEY_DEV')}
 
 
+# exchange user config
+EXCHANGE_USER_CONFIG = {'email': environ.get('EXCHANGE_USER_EMAIL'), 'username': environ.get('EXCHANGE_USER_USERNAME'), 'password': environ.get('EXCHANGE_USER_PASSWORD')}
+
 # setup redis queue
 RQ_QUEUES = {
     
