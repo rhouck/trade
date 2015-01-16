@@ -3,6 +3,7 @@ import os
 from trade.settings import *
 from trade.utils import *
 
+from utils import *
 
 class UserSignupTests(TestCase):
 
@@ -18,18 +19,8 @@ class UserSignupTests(TestCase):
 		self.ledger_count = sum([1 for i in Ledger.Query.all()])
 
 	def tearDown(self):
-		"""
-		delete test user from db
-		"""
-		user = ParseUser.login(self.username, self.password)
 		
-		port_item = Portfolio.Query.get(user_id=user.objectId)
-		port_item.delete()
-
-		ledger_item = Ledger.Query.get(user_id=user.objectId)
-		ledger_item.delete()
-		
-		user.delete()
+		drop_test_user(self.username, self.password)
 
 		# confirm number of user and ledger objects has not changed as a result of testing
 		post_user_count = sum([1 for i in ParseUser.Query.all()])

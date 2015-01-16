@@ -21,3 +21,12 @@ class EnvVarsTests(TestCase):
 
 		self.assertTrue(PARSE_CONFIG_DEV['app_id'])
 		self.assertTrue(PARSE_CONFIG_DEV['api_key'])
+
+	def test_parse_exchange_user_vars_are_available(self):
+		"""
+		confirm configuration variables are available
+		"""
+		self.assertTrue(EXCHANGE_USER_CONFIG['email'])
+		self.assertTrue(EXCHANGE_USER_CONFIG['username'])
+		self.assertTrue(EXCHANGE_USER_CONFIG['password'])
+		
