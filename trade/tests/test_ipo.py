@@ -20,8 +20,11 @@ class BuyIPOSharesTests(TestCase):
 		self.password = 'password'
 		self.email = 'test@test.com'
 		
+		# create test exchange user
+		self.test_exchange_user = create_test_exchange_user()
+
 		# create test user, company and ipo object
-		user = user_signup(self.email, self.username, self.password)
+		user = user_signup(self.email, self.username, self.password, self.test_exchange_user['user'])
 		self.user_id = user.objectId
 		create_company(self.name, self.ticker)
 		create_ipo_object(self.ticker, 10.0, 100)
@@ -29,6 +32,8 @@ class BuyIPOSharesTests(TestCase):
 	def tearDown(self):
 		
 		drop_test_user(self.username, self.password)
+
+		drop_test_user(self.test_exchange_user['user'].username, self.test_exchange_user['password'])
 
 		try:
 			ipo = IPO.Query.get(ticker=self.ticker)

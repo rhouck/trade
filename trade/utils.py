@@ -29,32 +29,6 @@ def get_exchange_user():
 		return None
 ExchangeUser = get_exchange_user()
 
-def offer(user_id, dir, quant, price=None):
-	"""
-	use this function to offer to buy or sell shares
-	user_id - parse user id
-	dir - str 'buy' or 'sell'
-	quant - int num shares
-	px - None if market, float if limit
-	"""
-	pass
-
-def update_ledger(user_id, amount):
-	"""
-	records changes to cash balance due to trades, signups, referrals, etc
-	user_id - parse user id
-	amount - float representing dollar value
-	"""
-
-	if not isinstance(user_id, unicode):
-		raise ValueError('user_id must be unicode.')
-	if not isinstance(amount, float):
-		raise ValueError('amount must be float.')
-	
-	ledger_item = Ledger(user_id=user_id, amount=amount)
-	ledger_item.save()
-	return ledger_item
-
 def create_portfolio(user_id):
 	"""
 	creates a portoflio object to periodically summarize cash balance and shares held
@@ -83,7 +57,7 @@ def create_parse_user(email, username, password):
 	user = ParseUser.signup(username=username, password=password, email=email, ref=ref)
 	return user	
 
-def user_signup(email, username, password):
+def user_signup(email, username, password, exchange):
 	"""
 	call functions required to setup new user
 	"""
@@ -98,7 +72,7 @@ def user_signup(email, username, password):
 
 	try:
 		create_portfolio(user.objectId)
-		update_ledger(user.objectId, 100.0)
+		update_ledger(exchange.objectId, user.objectId, 100.0)
 	except Exception as err:
 		# delete created user if error in update_ledger
 		user.delete()
@@ -188,6 +162,32 @@ def buy_ipo_shares(user_id, ticker, quantity):
 		raise Exception('No IPO object available for that ticker - %s' % (err))
 	
 	pass 
+
+
+def update_ledger(from_user_id, to_user_id, amount, ticker=None, share_price=None, share_quantity=None, fees=None):
+	"""
+	a recording of transferred assets
+
+	from_user_id - string - parse object id of user tansfering assets
+	to_user_id - string - parse object id of user accepting transferred assets
+	amount - float - cash value of transfer, not including fees
+	ticker - string 
+	share_price - float
+	share_quantity - int
+	fees - float
+	"""
+	"""
+	if not isinstance(user_id, unicode):
+		raise ValueError('user_id must be unicode.')
+	if not isinstance(amount, float):
+		raise ValueError('amount must be float.')
+	"""
+	ledger_item = Ledger(from_user_id=from_user_id, to_user_id=to_user_id, amount=amount,)
+	for i in (ticker, share_price, share_quantity, fees):
+		if i:
+			setattr(ledger_item, str(i), i)
+	ledger_item.save()
+	return ledger_item
 
 
 if __name__ == "__main__":

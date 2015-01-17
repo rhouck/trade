@@ -18,9 +18,14 @@ class UserSignupTests(TestCase):
 		self.port_count = sum([1 for i in Portfolio.Query.all()])
 		self.ledger_count = sum([1 for i in Ledger.Query.all()])
 
+		# create test exchange user
+		self.test_exchange_user = create_test_exchange_user()
+
 	def tearDown(self):
 		
 		drop_test_user(self.username, self.password)
+
+		drop_test_user(self.test_exchange_user['user'].username, self.test_exchange_user['password'])
 
 		# confirm number of user and ledger objects has not changed as a result of testing
 		post_user_count = sum([1 for i in ParseUser.Query.all()])
@@ -32,7 +37,7 @@ class UserSignupTests(TestCase):
 		post_ledger_count = sum([1 for i in Ledger.Query.all()])
 		self.assertEqual(self.ledger_count, post_ledger_count)
 
-	
+
 	def test_create_user(self):
 		
 		"""
@@ -40,7 +45,7 @@ class UserSignupTests(TestCase):
 		"""
 		raised = False
 		try:
-			user_signup('email', self.username, self.password)
+			user_signup('email', self.username, self.password, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not recognize bad email format')
@@ -50,7 +55,7 @@ class UserSignupTests(TestCase):
 		"""		
 		raised = False
 		try:
-			user_signup(1, self.username, self.password)
+			user_signup(1, self.username, self.password, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not recognize incorrect email value')
@@ -60,7 +65,7 @@ class UserSignupTests(TestCase):
 		"""
 		raised = False
 		try:
-			user_signup(self.email, 1, self.password)
+			user_signup(self.email, 1, self.password, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not recognize incorrect username value')
@@ -70,7 +75,7 @@ class UserSignupTests(TestCase):
 		"""
 		raised = False
 		try:
-			user_signup(self.email, self.username, 1)
+			user_signup(self.email, self.username, 1, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not recognize incorrect password value')
@@ -81,20 +86,21 @@ class UserSignupTests(TestCase):
 		"""
 		raised = False
 		try:
-			user_signup(self.email, self.username, self.password)
+			user_signup(self.email, self.username, self.password, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertFalse(raised, 'Did not create new user')
 
-
+	
+	
 	def test_create_duplicate_user(self):
 		"""
 		try creating duplicate user
 		"""
 		raised = False
 		try:
-			user_signup(self.email, self.username, self.password)
-			user_signup(self.email, self.username, self.password)
+			user_signup(self.email, self.username, self.password, self.test_exchange_user['user'])
+			user_signup(self.email, self.username, self.password, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Created duplicate user')
