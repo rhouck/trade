@@ -11,15 +11,9 @@ def drop_test_user(username, password):
 
 	user = ParseUser.login(username, password)
 		
-	#port_item = Portfolio.Query.get(user_id=user.objectId)
-	#port_item.delete()
-
 	port_items = Portfolio.Query.filter(user_id=user.objectId)
 	batcher.batch_delete(port_items)
 	
-	#ledger_item = Ledger.Query.get(user_id=user.objectId)
-	#ledger_item.delete()
-
 	ledger_items = Ledger.Query.filter(to_user_id=user.objectId)
 	batcher.batch_delete(ledger_items)
 

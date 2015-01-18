@@ -80,6 +80,15 @@ class UserSignupTests(TestCase):
 			raised = True
 		self.assertTrue(raised, 'Did not recognize incorrect password value')
 
+		"""
+		test invalid exchange user value type
+		"""
+		raised = False
+		try:
+			user_signup(self.email, self.username, self.password, 'user')
+		except:
+			raised = True
+		self.assertTrue(raised, 'Did not recognize incorrect user value')
 
 		"""
 		test propper sign up
@@ -184,14 +193,21 @@ class IPOTests(TestCase):
 		self.auth = 1000000
 		
 		self.ipo_count = sum([1 for i in IPO.Query.all()])
-
+	
+		self.port_count = sum([1 for i in Portfolio.Query.all()])
+		
 		# create test company
 		create_company(self.name, self.ticker)
-	
+
+		# create test exchange user
+		self.test_exchange_user = create_test_exchange_user()
+
 	def tearDown(self):
 		
 		company = Company.Query.get(ticker=self.ticker)
 		company.delete()
+		
+		drop_test_user(self.test_exchange_user['user'].username, self.test_exchange_user['password'])
 
 		try:
 			# certain tests don't result in created IPO item so can't force delete object
@@ -204,40 +220,54 @@ class IPOTests(TestCase):
 		post_ipo_count = sum([1 for i in IPO.Query.all()])
 		self.assertEqual(self.ipo_count, post_ipo_count)
 
-	
+		# confirm number of portfolio objects has increased by one
+		post_port_count = sum([1 for i in Portfolio.Query.all()])
+		self.assertEqual(self.port_count, post_port_count)
+
 	def test_create_ipo_object_where_co_not_exist(self):
+		
 		raised = False
 		try:
-			create_ipo_object('BADTICKER', self.price, self.auth)
+			create_ipo_object('BADTICKER', self.price, self.auth, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, "Created IPO object not tied to existing company")
+
+		# confirm number of portfolio objects has increased by one
+		post_port_count = sum([1 for i in Portfolio.Query.all()])
+		self.assertEqual(self.port_count, post_port_count-1)
 	
 	def test_create_ipo_object(self):
-
 		"""
 		test impropper inputs
 		"""
 		raised = False
 		try:
-			create_ipo_object(1, self.price, self.auth)
+			create_ipo_object(1, self.price, self.auth, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not catch impropper ticker value')
 
 		raised = False
 		try:
-			create_ipo_object(self.ticker, 'price', self.auth)
+			create_ipo_object(self.ticker, 'price', self.auth, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not catch impropper price value')
 
 		raised = False
 		try:
-			create_ipo_object(self.ticker, self.price, 'auth')
+			create_ipo_object(self.ticker, self.price, 'auth', self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Did not catch impropper auth value')
+
+		raised = False
+		try:
+			create_ipo_object(self.ticker, self.price, self.auth, 'user')
+		except:
+			raised = True
+		self.assertTrue(raised, 'Did not catch impropper exchange user value')
 
 	
 		"""
@@ -245,11 +275,20 @@ class IPOTests(TestCase):
 		"""
 		raised = False
 		try:
-			create_ipo_object(self.ticker, self.price, self.auth)
+			create_ipo_object(self.ticker, self.price, self.auth, self.test_exchange_user['user'])
 		except Exception as err:
 			print err
 			raised = True
 		self.assertFalse(raised, 'Could not create test IPO')
+
+		# confirm number of portfolio objects has increased by one
+		post_port_count = sum([1 for i in Portfolio.Query.all()])
+		self.assertEqual(self.port_count, post_port_count-2)
+		
+		# confirm latest portfolio object for excahnge reflects ipo
+		current_exchange_portfolio = Portfolio.Query.filter(user_id=self.test_exchange_user['user'].objectId).order_by("-createdAt").limit(1)[0]
+		self.assertEqual(getattr(current_exchange_portfolio, self.ticker), self.auth)
+
 
 	def test_creation_of_duplicate_ipo_objects(self):
 		"""
@@ -257,8 +296,15 @@ class IPOTests(TestCase):
 		"""
 		raised = False
 		try:
-			create_ipo_object(self.ticker, self.price, self.auth)
-			create_ipo_object(self.ticker, self.price, self.auth)
+			create_ipo_object(self.ticker, self.price, self.auth, self.test_exchange_user['user'])
+			create_ipo_object(self.ticker, self.price, self.auth, self.test_exchange_user['user'])
 		except:
 			raised = True
 		self.assertTrue(raised, 'Could create duplicate name company')
+
+		# confirm number of portfolio objects has increased by one
+		post_port_count = sum([1 for i in Portfolio.Query.all()])
+		self.assertEqual(self.port_count, post_port_count-2)
+
+class LedgerTests(TestCase):
+	pass

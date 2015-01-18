@@ -61,9 +61,10 @@ def user_signup(email, username, password, exchange):
 	"""
 	call functions required to setup new user
 	"""
-
 	if not isinstance(username, str) or not isinstance(email, str) or not isinstance(password, str):
 		raise ValueError('username, email, and password must be strings.')
+	if not isinstance(exchange, ParseUser):
+		raise ValueError('exchange must be parse user object.')
 
 	try:
 		user = create_parse_user(email, username, password)
@@ -113,7 +114,7 @@ def get_company_by_ticker(ticker):
 	company = Company.Query.get(ticker=ticker)
 	return company
 
-def create_ipo_object(ticker, price, auth):
+def create_ipo_object(ticker, price, auth, exchange):
 	"""
 	creates an parse db object to represent the shares made available in a public offering for a company
 	
@@ -133,7 +134,10 @@ def create_ipo_object(ticker, price, auth):
 		raise ValueError('price must be positive.')
 	if auth <= 0:
 		raise ValueError('auth must be positive.')
-	
+	if not isinstance(exchange, ParseUser):
+		raise ValueError('exchange must be parse user object.')
+
+
 	company = get_company_by_ticker(ticker)
 
 	#check for duplicate companies
@@ -144,8 +148,55 @@ def create_ipo_object(ticker, price, auth):
 
 	ipo_object = IPO(company_id=company.objectId, ticker=ticker, price=price, auth=auth)
 	ipo_object.save()
+
+	# update exchnage portfolio
+	value_updates = {ticker: auth}
+	update_portfolio_object(exchange.objectId, value_updates)
+	
 	return ipo_object
 
+def update_portfolio_object(user_id, value_updates):
+	"""
+	creates a new portfolio object to reflect changes to cash balance or share ownership
+	it first creats a portfolio object matching user generated values in most recently created portfolio object
+
+	user_id - parse user object id
+	value_updates - a dictionary containing the items to update as keys and the values by which to agument current values in as values
+	"""
+	if not isinstance(user_id, unicode):
+		raise ValueError('user_id must be unicode.')
+	if not isinstance(value_updates, dict):
+		raise ValueError('value_updates must be dict with portfolio item as key and desired change in value as value.')
+
+	current_portfolio = Portfolio.Query.filter(user_id=user_id).order_by("-createdAt").limit(1)[0]
+	new_portfolio = duplicate_parse_object(Portfolio, current_portfolio)
+
+	current_portfolio_items = new_portfolio.__dict__.keys()
+	for k, v in value_updates.iteritems():
+		if k in current_portfolio_items:
+			setattr(new_portfolio, k, getattr(new_portfolio, k) + v)
+		else:
+			setattr(new_portfolio, k, v)
+	new_portfolio.save()
+	return new_portfolio
+
+def duplicate_parse_object(object_type, current_state):
+	"""
+	use to create new parse object with identical user generated values as existing object
+	this can be used as part of the process of creating updated states of portfolio objects
+	
+	object_type - the parse object class name you want to create a new instance of
+	current_state - an instnace of object_type that contains user generated values you want to duplicate
+	"""
+	if not isinstance(object_type, object) or not isinstance(current_state, object):
+		raise ValueError('object_type and current_state must both be objects.')
+	
+	new = object_type()
+	ignore = ('_created_at', '_updated_at', 'objectId')
+	for k, v in current_state.__dict__.iteritems():
+		if k not in ignore:
+			setattr(new, str(k), v)
+	return new
 
 def buy_ipo_shares(user_id, ticker, quantity):
 	
@@ -176,6 +227,7 @@ def update_ledger(from_user_id, to_user_id, amount, ticker=None, share_price=Non
 	share_quantity - int
 	fees - float
 	"""
+	
 	"""
 	if not isinstance(user_id, unicode):
 		raise ValueError('user_id must be unicode.')
