@@ -27,7 +27,7 @@ class BuyIPOSharesTests(TestCase):
 		user = user_signup(self.email, self.username, self.password, self.test_exchange_user['user'])
 		self.user_id = user.objectId
 		create_company(self.name, self.ticker)
-		create_ipo_object(self.ticker, 10.0, 100)
+		create_ipo_object(self.ticker, 10.0, 100, self.test_exchange_user['user'])
 
 	def tearDown(self):
 		
@@ -44,7 +44,6 @@ class BuyIPOSharesTests(TestCase):
 		company = Company.Query.get(ticker=self.ticker)
 		company.delete()
 
-
 	
 	# test expired ipo
 	# test insufficient cash
@@ -54,35 +53,19 @@ class BuyIPOSharesTests(TestCase):
 		ipo = IPO.Query.get(ticker=self.ticker)
 		ipo.delete()
 
-		raised = False
-		try:
-			buy_ipo_shares(self.user_id, self.ticker, 10)
-		except:
-			raised = True
+		raised = raises_exception(buy_ipo_shares, self.user_id, self.ticker, 10)
 		self.assertTrue(raised, 'Did not properly check that an IPO object was available')
 
 	def test_purchase_ipo_shares_inputs(self):
 		"""
 		test impropper inputs
 		"""
-		raised = False
-		try:
-			buy_ipo_shares(1, self.ticker, 10)
-		except:
-			raised = True
+		raised = raises_exception(buy_ipo_shares, 1, self.ticker, 10)
 		self.assertTrue(raised, 'Did not catch impropper user_id value')
 
-		raised = False
-		try:
-			buy_ipo_shares(self.user_id, 1, 10)
-		except:
-			raised = True
+		raised = raises_exception(buy_ipo_shares, self.user_id, 1, 10)
 		self.assertTrue(raised, 'Did not catch impropper ticker value')
 
-		raised = False
-		try:
-			buy_ipo_shares(self.user_id, self.ticker, '10')
-		except:
-			raised = True
+		raised = raises_exception(buy_ipo_shares, self.user_id, self.ticker, '10')
 		self.assertTrue(raised, 'Did not catch impropper quantity value')
 

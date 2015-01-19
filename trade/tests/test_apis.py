@@ -2,6 +2,7 @@ from django.test import TestCase
 import os
 from trade.settings import *
 from trade.utils import *
+from utils import *
 
 class ApiConnectionTests(TestCase):
 	"""
@@ -14,7 +15,7 @@ class ApiConnectionTests(TestCase):
 		# trigger exception if register credentials aren't correct
 		raised = False
 		try:
-			register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])	
+			register(PARSE_CONFIG['app_id'], PARSE_CONFIG['api_key'])
 			users = [u for u in ParseUser.Query.all().limit(1)]
 		except:
 			raised = True

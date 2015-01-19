@@ -2,6 +2,7 @@ from django.test import TestCase
 import os
 from trade.settings import *
 from trade.utils import *
+from utils import *
 
 class ExchangeUserTests(TestCase):
 
@@ -11,11 +12,6 @@ class ExchangeUserTests(TestCase):
 
 	def test_find_object_portfolio(self):
 
-		raised = False
-		try:
-			portfolio = Portfolio.Query.get(user_id=ExchangeUser.objectId)
-		except:
-			raised = True
-			
+		raised = raises_exception(Portfolio.Query.get, user_id=ExchangeUser.objectId)	
 		self.assertFalse(raised, 'Did not find portfolio object for exhange user')
 

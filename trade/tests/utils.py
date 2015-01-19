@@ -2,6 +2,19 @@ from trade.settings import *
 from trade.utils import *
 from parse_rest.connection import ParseBatcher
 
+
+def raises_exception(func, *args, **kwargs):
+	"""
+	pass functions with parameters here to test whether they raise exceptions
+	"""
+	raised = False
+	try:
+		func(*args, **kwargs)
+	except Exception as err:
+		#print "Error message: %s" % (err)
+		raised = True
+	return raised
+
 def drop_test_user(username, password):
 	"""
 	delete user and associated portfolio and ledger objects
