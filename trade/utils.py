@@ -6,6 +6,8 @@ import string
 from django.utils.timezone import utc
 from settings import LIVE, EXCHANGE_USER_CONFIG
 
+from exchange_settings import *
+
 class Company(Object):
     pass
 class Ledger(Object):
@@ -228,18 +230,52 @@ def update_ledger(from_user_id, to_user_id, amount, ticker=None, share_price=Non
 	fees - float
 	"""
 	
-	"""
-	if not isinstance(user_id, unicode):
-		raise ValueError('user_id must be unicode.')
-	if not isinstance(amount, float):
-		raise ValueError('amount must be float.')
-	"""
+	if not isinstance(from_user_id, unicode):
+		raise ValueError('from_user_id must be unicode.')
+	if not isinstance(to_user_id, unicode):
+		raise ValueError('to_user_id must be unicode.')
+	if from_user_id == to_user_id:
+		raise ValueError('from_user_id and to_user_id must be different.')
+	if not isinstance(amount, float) or amount <= 0:
+		raise ValueError('amount must be float and positive.')
+	
+	share_purchase = False
+	purchase_cols = ('ticker', 'share_price', 'share_quantity', 'fees')
+	for i in purchase_cols:
+		if eval(i):
+			share_purchase = True
+	
+	if share_purchase:
+		if not isinstance(ticker, str):
+			raise ValueError('ticker must be string if attempting to purchase shares.')
+		if not isinstance(share_price, float) or share_price <= 0:
+			raise ValueError('share_price must be float and positive if attempting to purchase shares.')
+		if not isinstance(share_quantity, int) or share_quantity <= 0:
+			raise ValueError('share_quantity must be int and positive if attempting to purchase shares.')
+		if not isinstance(fees, float) or fees < 0:
+			raise ValueError('fees must be float and greater than or equal to zero if attempting to purchase shares.')
+		"""
+		for i in purchase_cols:
+			if not eval(i):
+				raise ValueError('if attempting to purchase stock, must provide ticker, share_price, share_quantity, and fees.')
+		"""	
 	ledger_item = Ledger(from_user_id=from_user_id, to_user_id=to_user_id, amount=amount,)
-	for i in (ticker, share_price, share_quantity, fees):
-		if i:
-			setattr(ledger_item, str(i), i)
+	if share_purchase:
+		for i in purchase_cols:
+			setattr(ledger_item, i, eval(i))
 	ledger_item.save()
 	return ledger_item
+	
+
+def offer(user_id, dir, quant, price=None):
+	"""
+	use this function to offer to buy or sell shares
+	user_id - parse user id
+	dir - str 'buy' or 'sell'
+	quant - int num shares
+	px - None if market, float if limit
+	"""
+	pass
 
 
 if __name__ == "__main__":
